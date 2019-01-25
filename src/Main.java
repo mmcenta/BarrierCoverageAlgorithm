@@ -1,5 +1,5 @@
-import FordFulkerson.FlowNetwork;
-import FordFulkerson.MaximumFlow;
+import MaximumFlow.FlowNetwork;
+import MaximumFlow.MaxFlowSolver;
 import models.Edge;
 import models.Node;
 import models.Graph;
@@ -41,7 +41,7 @@ public class Main {
 		nw.setCapacity(3, 5, 1);
 		nw.setCapacity(4, 5, 1);
 		
-		MaximumFlow mf = new MaximumFlow(nw);
+		MaxFlowSolver mf = new MaxFlowSolver(nw);
 		int max = mf.maximumFlowSAP();
 		int[][] flow = mf.getFlow();
 		

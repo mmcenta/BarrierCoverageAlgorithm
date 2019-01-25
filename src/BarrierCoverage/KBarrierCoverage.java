@@ -2,9 +2,13 @@ package BarrierCoverage;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 
-import FordFulkerson.FlowNetwork;
+import MaximumFlow.FlowNetwork;
+import MaximumFlow.MaxFlowSolver;
+import models.Edge;
 import models.Graph;
+import models.Node;
 
 public class KBarrierCoverage {
 	float x_max, y_max, R;
@@ -41,7 +45,7 @@ public class KBarrierCoverage {
 		sensors.add(new Sensor(x, y, durability));
 	}
 	
-	public void sortSensors() {
+	private void sortSensors() {
 		Collections.sort(sensors, Sensor.xCoordCompare);
 	}
 	
@@ -99,7 +103,48 @@ public class KBarrierCoverage {
 		}
 	}
 	
-	private FlowNetwork buildFlowNetwork() {
+	public FlowNetwork buildFlowNetwork() {
+		int nSensors = sensors.size();
+		int flowUpperBound; 
+		FlowNetwork nw = new FlowNetwork(2*nSensors + 2);
 		
+		// Get an upper limit for the flow
+		flowUpperBound = Math.min(coverage.getNode(left.getNode()).out.size(), coverage.getNode(right.getNode()).out.size());
+		
+		// If the coverage graph was not built, build it
+		if(coverage == null)
+			buildCoverageGraph();
+		
+		
+		for(int k = 1; k <= nSensors; k++) {
+			Node covNode = coverage.getNode(k);
+			
+			nw.addEdge(k, k + nSensors, sensors.get(k).durability);
+			for(Edge e: covNode.out)
+				nw.addEdge(k + nSensors, e.to, flowUpperBound);
+		}
+		
+		return nw;
+	}
+	
+	private LinkedList<Integer> dfsPath(int[][] adj) {
+		LinkedList<Integer> path = new LinkedList<Path>();	
+	}
+	
+	public LinkedList<LinkedList<Integer>> getNodeDisjointPaths() {
+		LinkedList<LinkedList<Integer>> paths = new LinkedList<>();
+		FlowNetwork nw = buildFlowNetwork();
+		
+		MaxFlowSolver max = new MaxFlowSolver(nw);
+		int maxFlow = max.maximumFlowSAP();
+		int[][] flow = max.getFlow();
+		
+		// Depth-first search
+		LinkedList<Integer> currPath = new LinkedList<Integer>();
+		LinkedList<Integer> stack = new LinkedList<Integer>();
+		stack.push(0);
+		
+		
+		return paths;
 	}
 }

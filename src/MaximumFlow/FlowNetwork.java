@@ -1,4 +1,4 @@
-package FordFulkerson;
+package MaximumFlow;
 
 import models.Graph;
 import models.Node;
@@ -42,8 +42,9 @@ public class FlowNetwork {
 		capacities[from][to] += change;
 	}
 	
-	public void addEdge(int from, int to) {
+	public void addEdge(int from, int to, int capacity) {
 		// Wraps the method addEdge from the graph
+		capacities[from][to] = capacity;
 		graph.addEdge(from, to);
 	}
 	
