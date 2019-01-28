@@ -5,7 +5,7 @@ import java.util.Comparator;
 public class Sensor {
 	public float x, y;
 	int durability;
-	int node;  // the node of the coverage graph that represents this sensor
+	int number;  // the number of this sensor on the input
 	
 	public Sensor(float x, float y, int durability) {
 		this.x = x;
@@ -13,12 +13,12 @@ public class Sensor {
 		this.durability = durability;
 	}
 	
-	public void setNode(int node) {
-		this.node = node;
+	public void setNumber(int num) {
+		this.number = num;
 	}
 	
-	public int getNode() {
-		return this.node;
+	public int getNumber() {
+		return this.number;
 	}
 	
 	public static float getDistance(Sensor s1, Sensor s2) {

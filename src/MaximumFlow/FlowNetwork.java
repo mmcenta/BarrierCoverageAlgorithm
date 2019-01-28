@@ -5,15 +5,15 @@ import models.Node;
 
 public class FlowNetwork {
 	//	A class that represents a flow network
-	Graph graph;  // the graph representing the network
+	public Graph graph;  // the graph representing the network
 	public int source, sink;  // the node that represents the source and the sink  
 	private int V;  // the number of vertices
-	private int[][] capacities;  // capacities[i][j] stores the capacity from edge i to j
+	private float[][] capacities;  // capacities[i][j] stores the capacity from edge i to j
 	
 	public FlowNetwork(Graph directedGraph) {
 		this.graph = directedGraph;
 		this.V = directedGraph.nNodes;
-		this.capacities = new int[V][V];
+		this.capacities = new float[V][V];
 		
 		// For simplicity, the source is the first node and the sink is the last node 
 		this.source = 0;
@@ -23,26 +23,26 @@ public class FlowNetwork {
 	public FlowNetwork(int numberNodes) {
 		this.graph = new Graph(numberNodes);
 		this.V = numberNodes;
-		this.capacities = new int[V][V];
+		this.capacities = new float[V][V];
 		
 		// For simplicity, the source is the first node and the sink is the last node 
 		this.source = 0;
 		this.sink = this.graph.nNodes-1;
 	}
 	
-	public int getCapacity(int from, int to) {
+	public float getCapacity(int from, int to) {
 		return capacities[from][to];
 	}
 	
-	public void setCapacity(int from, int to, int capacity) {
+	public void setCapacity(int from, int to, float capacity) {
 		capacities[from][to] = capacity;
 	}
 	
-	public void updateCapacity(int from, int to, int change) {
+	public void updateCapacity(int from, int to, float change) {
 		capacities[from][to] += change;
 	}
 	
-	public void addEdge(int from, int to, int capacity) {
+	public void addEdge(int from, int to, float capacity) {
 		// Wraps the method addEdge from the graph
 		capacities[from][to] = capacity;
 		graph.addEdge(from, to);

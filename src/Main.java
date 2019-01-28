@@ -1,11 +1,12 @@
+import java.util.*;
+
 import MaximumFlow.FlowNetwork;
 import MaximumFlow.MaxFlowSolver;
-import models.Edge;
 import models.Node;
 import models.Graph;
 
 public class Main {
-	static void printMatrix(int[][] m) {
+	static void printMatrix(float[][] m) {
 		System.out.println();
 		System.out.print("   ");
 		for(int j=0; j < m[0].length; j++)
@@ -15,7 +16,7 @@ public class Main {
 			System.out.format("%2d: ", i);
 			for(int j=0; j < m[0].length; j++)
 				if(m[i][j] != -1)
-					System.out.format("%3d ", m[i][j]);
+					System.out.format("%3f ", m[i][j]);
 				else
 					System.out.print("--- ");
 			System.out.println();
@@ -23,6 +24,18 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
+		ArrayList<Integer> t = new ArrayList<Integer>(3);
+		
+		t.add(3);
+		t.add(2);
+		t.add(1);
+		System.out.println(t);
+		
+		ArrayList<Integer> t_shallow = new ArrayList<Integer>(t);
+		Collections.sort(t_shallow);
+		System.out.println(t_shallow);
+		
+		/*
 		Graph g = new Graph(6);
 		g.addEdge(0, 1);
 		g.addEdge(0, 2);
@@ -42,11 +55,12 @@ public class Main {
 		nw.setCapacity(4, 5, 1);
 		
 		MaxFlowSolver mf = new MaxFlowSolver(nw);
-		int max = mf.maximumFlowSAP();
-		int[][] flow = mf.getFlow();
+		float max = mf.getMaxFlow();
+		float[][] flow = mf.getFlow();
 		
 		System.out.println(max);
 		printMatrix(flow);
+		*/
 	}
 
 }

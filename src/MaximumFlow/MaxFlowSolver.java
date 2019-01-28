@@ -9,12 +9,21 @@ public class MaxFlowSolver {
 	FlowNetwork nw;
 	FlowNetwork residual;
 	int V;
-	int[][] flow;
+	float[][] flow;
 	
 	public MaxFlowSolver(FlowNetwork network) {
 		this.nw = network;
 		this.V = network.graph.nNodes;
-		this.flow = new int[V][V];
+		this.flow = new float[V][V];
+	}
+	
+	public void setFlowNetwork(FlowNetwork newNetwork) {
+		nw = newNetwork;
+		
+		if(V != newNetwork.graph.nNodes) {
+			V = newNetwork.graph.nNodes;
+			flow = new float[V][V];
+		}
 	}
 	
 	private void initializeFlow() {
@@ -22,7 +31,7 @@ public class MaxFlowSolver {
 		// flow[u][v] if the edge from node u to node v doesn't exist on the original network
 		for(int i=0; i < V; i++)
 			for(int j=0; j < V; j++)
-				flow[i][j] = -1;
+				flow[i][j] = Float.NEGATIVE_INFINITY;
 		
 		for(int from=0; from < V; from++) {
 			Node fromNode = nw.getNode(from);
@@ -44,8 +53,8 @@ public class MaxFlowSolver {
 				residual.addEdge(from, to, nw.getCapacity(from, to));
 				
 				// Create the backwards edge if it doens't exist on the original graph
-				if(flow[to][from] == -1)
-					// flow[i][j] is -1 if the edge from i to j doesn't exist on the original graph
+				if(flow[to][from] == Float.NEGATIVE_INFINITY)
+					// flow[i][j] is - /infty if the edge from i to j doesn't exist on the original graph
 					residual.addEdge(from, to, 0);
 			}
 		}
@@ -77,8 +86,8 @@ public class MaxFlowSolver {
 		return visited[residual.sink];
 	}
 	
-	private int augmentPath(int[] paths) {
-		int bottleneck = Integer.MAX_VALUE; // stores the minimum residual capacity along the path
+	private float augmentPath(int[] paths) {
+		float bottleneck = Integer.MAX_VALUE; // stores the minimum residual capacity along the path
 		
 		// Calculate the bottleneck of the path (minimum residual capacity)
 		int curr = residual.sink;
@@ -110,11 +119,11 @@ public class MaxFlowSolver {
 		return bottleneck;
 	}
 	
-	public int maximumFlowSAP() {
+	public float getMaxFlow() {
 		// Shortest Augmenting Path implementation of the Ford-Fulkerson Algorithm
 		// Also called the Dinitz-Edmonds-Karp Algorithm
 		int[] paths = new int[V]; // stores the search paths of the last BFS
-		int max_flow = 0;
+		float max_flow = 0;
 		
 		initializeFlow();
 		initializeResidualNetwork();
@@ -127,7 +136,7 @@ public class MaxFlowSolver {
 		return max_flow;
 	}
 	
-	public int[][] getFlow() {
+	public float[][] getFlow() {
 		return flow;
 	}
 }
