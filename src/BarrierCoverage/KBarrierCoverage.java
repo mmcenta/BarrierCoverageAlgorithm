@@ -5,17 +5,18 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import MaximumFlow.FlowNetwork;
-import MaximumFlow.MaxFlowSolver;
+import algorithms.MaxFlow;
+import models.FlowNetwork;
 import models.Graph;
 import models.Node;
 
 public class KBarrierCoverage {
-	float x_max, y_max, R, maxDurability;
+	float x_max, y_max, R;
 	int K, nSensors;
 	Sensor left, right;
 	ArrayList<Sensor> sensors;
 	Graph coverage;
+	FlowNetwork nw;
 	
 	public KBarrierCoverage(float x_max, float y_max, float R, int K) {
 		this.x_max = x_max;
@@ -23,8 +24,7 @@ public class KBarrierCoverage {
 		
 		this.R = R;
 		this.K = K;
-		
-		this.maxDurability = Float.NEGATIVE_INFINITY;
+
 		this.sensors = new ArrayList<Sensor>();
 		this.left = new Sensor(0, 0, Integer.MAX_VALUE);
 		this.right = new Sensor(x_max, 0 , Integer.MAX_VALUE);
@@ -36,8 +36,7 @@ public class KBarrierCoverage {
 		
 		this.R = R;
 		this.K = K;
-		
-		this.maxDurability = Float.NEGATIVE_INFINITY;
+
 		this.sensors = new ArrayList<Sensor>(nSensors);
 		this.left = new Sensor(0, 0, Integer.MAX_VALUE);
 		this.right = new Sensor(x_max, 0 , Integer.MAX_VALUE);
@@ -46,8 +45,6 @@ public class KBarrierCoverage {
 	public void addSensor(float x, float y, int durability) {
 		sensors.add(new Sensor(x, y, durability));
 		nSensors++;
-		if(durability > maxDurability)
-			maxDurability = durability;
 	}
 	
 	private List<Sensor> sortedSensors() {
@@ -108,12 +105,12 @@ public class KBarrierCoverage {
 		}
 	}
 	
-	public FlowNetwork buildFlowNetwork() {
+	public void buildFlowNetwork() {
 		// Build flow nework by spliting sensor nodes (not left and right) into a in-node" and a out-node
 		// The capacity of the edge between the in-node and the out-node is the sensor durability
 		// The capacity between other nodes should be high enough to never restrict flow, we chose to sensor durability as well.
 		
-		FlowNetwork nw = new FlowNetwork(2*nSensors + 2); // The source is the left wall node and the sink is the right wall node
+		nw = new FlowNetwork(2*nSensors + 2); // The source is the left wall node and the sink is the right wall node
 		
 		// Build the coverage graph
 		buildCoverageGraph();
@@ -133,8 +130,6 @@ public class KBarrierCoverage {
 			for(int adj: coverageNode.out)
 				nw.addEdge(k + nSensors, adj, dur);
 		}
-		
-		return nw;
 	}
 	
 	private LinkedList<Integer> dfsPath(int[][] adj) {
@@ -145,11 +140,11 @@ public class KBarrierCoverage {
 	
 	public LinkedList<LinkedList<Integer>> getNodeDisjointPaths() {
 		LinkedList<LinkedList<Integer>> paths = new LinkedList<>();
-		FlowNetwork nw = buildFlowNetwork();
+		buildFlowNetwork();
 		
-		MaxFlowSolver max = new MaxFlowSolver(nw);
-		float maxFlow = max.getMaxFlow();
-		float[][] flow = max.getFlow();
+		MaxFlow max = new MaxFlow(nw);
+		float maxFlow = max.getMaxFlowValue();
+		float[][] flow = max.getMaxFlow();
 		
 		// Depth-first search
 		LinkedList<Integer> currPath = new LinkedList<Integer>();
@@ -158,38 +153,5 @@ public class KBarrierCoverage {
 		
 		
 		return paths;
-	}
-
-	private FlowNetwork getMaxBoundedFlowNetwork(FlowNetwork original, float maxBound) {
-		int nNodes = original.graph.nNodes;
-		FlowNetwork minNW = new FlowNetwork(nNodes);
-		
-		for(int node=0; node < nNodes; node++) {
-			Node origNode = original.getNode(node);
-			
-			for(int adj : origNode.out)
-				minNW.addEdge(node, adj, Math.min(original.getCapacity(node, adj), maxBound));
-		}
-		
-		return minNW;
-	}
-	
-	private float[][] getMaxKRouteFlow() {
-		FlowNetwork nw = buildFlowNetwork();
-		int E = nw.graph.nEdges;
-		float step = 1/(E*E);
-		
-		float prevFlow;
-		MaxFlowSolver solver = new MaxFlowSolver(nw);
-		for(float p = step; p < maxDurability; p += step) {
-			float flowP;
-			FlowNetwork bounded = getMaxBoundedFlowNetwork(nw, p);
-			
-			solver.setFlowNetwork(bounded);
-			flowP = solver.getMaxFlow();
-		}
-		
-		
-		return null;
 	}
 }

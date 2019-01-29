@@ -1,20 +1,30 @@
-package MaximumFlow;
+package algorithms;
 
 import java.util.LinkedList;
 
 import models.Node;
+import models.FlowNetwork;
 import models.Graph;
 
-public class MaxFlowSolver {
-	FlowNetwork nw;
-	FlowNetwork residual;
-	int V;
-	float[][] flow;
+public class MaxFlow {
+	private FlowNetwork nw;
+	private FlowNetwork residual;
+	private int V;
+
+	float maxFlowValue;
+	float[][] maxFlow;
 	
-	public MaxFlowSolver(FlowNetwork network) {
+	public MaxFlow() {
+		this.V = 0;
+		this.maxFlowValue = Float.NEGATIVE_INFINITY;
+	}
+	
+	public MaxFlow(FlowNetwork network) {
 		this.nw = network;
 		this.V = network.graph.nNodes;
-		this.flow = new float[V][V];
+		this.maxFlow = new float[V][V];
+		
+		this.maxFlowValue = Float.NEGATIVE_INFINITY;
 	}
 	
 	public void setFlowNetwork(FlowNetwork newNetwork) {
@@ -22,7 +32,7 @@ public class MaxFlowSolver {
 		
 		if(V != newNetwork.graph.nNodes) {
 			V = newNetwork.graph.nNodes;
-			flow = new float[V][V];
+			maxFlow = new float[V][V];
 		}
 	}
 	
@@ -31,12 +41,12 @@ public class MaxFlowSolver {
 		// flow[u][v] if the edge from node u to node v doesn't exist on the original network
 		for(int i=0; i < V; i++)
 			for(int j=0; j < V; j++)
-				flow[i][j] = Float.NEGATIVE_INFINITY;
+				maxFlow[i][j] = Float.NEGATIVE_INFINITY;
 		
 		for(int from=0; from < V; from++) {
 			Node fromNode = nw.getNode(from);
 			for(int to: fromNode.out)
-				flow[from][to] = 0;
+				maxFlow[from][to] = 0;
 		}
 	}
 	
@@ -53,9 +63,9 @@ public class MaxFlowSolver {
 				residual.addEdge(from, to, nw.getCapacity(from, to));
 				
 				// Create the backwards edge if it doens't exist on the original graph
-				if(flow[to][from] == Float.NEGATIVE_INFINITY)
+				if(maxFlow[to][from] == Float.NEGATIVE_INFINITY && from != nw.source && to != nw.sink)
 					// flow[i][j] is - /infty if the edge from i to j doesn't exist on the original graph
-					residual.addEdge(from, to, 0);
+					residual.addEdge(to, from, 0);
 			}
 		}
 	}
@@ -102,12 +112,12 @@ public class MaxFlowSolver {
 		curr = residual.sink;
 		while(paths[curr] != curr) {
 			int prev =  paths[curr];
-			if(flow[prev][curr] == -1) 
+			if(maxFlow[prev][curr] == Float.NEGATIVE_INFINITY) 
 				// If this is a backwards edge
-				flow[curr][prev] -= bottleneck;
+				maxFlow[curr][prev] -= bottleneck;
 			else
 				// If this is a forwards edge
-				flow[prev][curr] += bottleneck;
+				maxFlow[prev][curr] += bottleneck;
 			
 			// Update the residual graph
 			residual.updateCapacity(prev, curr, -bottleneck);
@@ -119,11 +129,11 @@ public class MaxFlowSolver {
 		return bottleneck;
 	}
 	
-	public float getMaxFlow() {
+	public void solveMaxFlow() {
 		// Shortest Augmenting Path implementation of the Ford-Fulkerson Algorithm
 		// Also called the Dinitz-Edmonds-Karp Algorithm
 		int[] paths = new int[V]; // stores the search paths of the last BFS
-		float max_flow = 0;
+		maxFlowValue = 0;
 		
 		initializeFlow();
 		initializeResidualNetwork();
@@ -131,12 +141,20 @@ public class MaxFlowSolver {
 		// While there is a path in the residual graph between the source and the sink,
 		// pick the shortest and augment the path.
 		while(shortestPath(paths))
-			max_flow += augmentPath(paths);
-		
-		return max_flow;
+			maxFlowValue += augmentPath(paths);
 	}
 	
-	public float[][] getFlow() {
-		return flow;
+	public float getMaxFlowValue() {
+		if(maxFlowValue == Float.NEGATIVE_INFINITY)
+			solveMaxFlow();
+		
+		return maxFlowValue;
+	}
+	
+	public float[][] getMaxFlow() {
+		if(maxFlowValue == Float.NEGATIVE_INFINITY)
+			solveMaxFlow();
+		
+		return maxFlow;
 	}
 }

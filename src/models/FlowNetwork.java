@@ -1,7 +1,4 @@
-package MaximumFlow;
-
-import models.Graph;
-import models.Node;
+package models;
 
 public class FlowNetwork {
 	//	A class that represents a flow network

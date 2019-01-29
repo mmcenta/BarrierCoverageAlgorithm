@@ -1,8 +1,10 @@
 import java.util.*;
 
-import MaximumFlow.FlowNetwork;
-import MaximumFlow.MaxFlowSolver;
+import BarrierCoverage.KBarrierCoverage;
+import algorithms.MaxFlow;
+import algorithms.MaxKRouteFlow;
 import models.Node;
+import models.FlowNetwork;
 import models.Graph;
 
 public class Main {
@@ -24,43 +26,26 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		ArrayList<Integer> t = new ArrayList<Integer>(3);
+		FlowNetwork nw = new FlowNetwork(6);
+		nw.addEdge(0, 1, 2);
+		nw.addEdge(0, 2, 2);
+		nw.addEdge(1, 2, 7);
+		nw.addEdge(1, 3, 3);
+		nw.addEdge(2, 4, 4);
+		nw.addEdge(3, 5, 2);
+		nw.addEdge(4, 3, 13);
+		nw.addEdge(4, 5, 2);
 		
-		t.add(3);
-		t.add(2);
-		t.add(1);
-		System.out.println(t);
-		
-		ArrayList<Integer> t_shallow = new ArrayList<Integer>(t);
-		Collections.sort(t_shallow);
-		System.out.println(t_shallow);
-		
-		/*
-		Graph g = new Graph(6);
-		g.addEdge(0, 1);
-		g.addEdge(0, 2);
-		g.addEdge(1, 2);
-		g.addEdge(1, 3);
-		g.addEdge(2, 4);
-		g.addEdge(3, 5);
-		g.addEdge(4, 5);
-		
-		FlowNetwork nw = new FlowNetwork(g);
-		nw.setCapacity(0, 1, 1);
-		nw.setCapacity(0, 2, 1);
-		nw.setCapacity(1, 2, 1);
-		nw.setCapacity(1, 3, 1);
-		nw.setCapacity(2, 4, 1);
-		nw.setCapacity(3, 5, 1);
-		nw.setCapacity(4, 5, 1);
-		
-		MaxFlowSolver mf = new MaxFlowSolver(nw);
-		float max = mf.getMaxFlow();
-		float[][] flow = mf.getFlow();
-		
-		System.out.println(max);
-		printMatrix(flow);
-		*/
+		MaxKRouteFlow mkf = new MaxKRouteFlow(nw, 2);
+		MaxFlow mf = new MaxFlow(nw);
+		for(float p=(float) 0.01; p <= 20; p += 0.01) {
+			mf.setFlowNetwork(mkf.getMaxBoundedFlowNetwork(p));
+			float F_p = mf.getMaxFlowValue();
+			float phi = F_p - 2*p;
+			System.out.format("%f: (%f, %f) ", p, F_p, phi);
+		}
+		System.out.println();
+		System.out.println(mkf.getMaxFlowValue());
+		printMatrix(mkf.getMaxFlow());
 	}
-
 }
