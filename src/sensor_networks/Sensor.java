@@ -1,16 +1,16 @@
-package BarrierCoverage;
+package sensor_networks;
 
 import java.util.Comparator;
 
 public class Sensor {
 	public float x, y;
-	int durability;
+	int lifetime;
 	int number;  // the number of this sensor on the input
 	
-	public Sensor(float x, float y, int durability) {
+	public Sensor(float x, float y, int lifetime) {
 		this.x = x;
 		this.y = y;
-		this.durability = durability;
+		this.lifetime = lifetime;
 	}
 	
 	public void setNumber(int num) {

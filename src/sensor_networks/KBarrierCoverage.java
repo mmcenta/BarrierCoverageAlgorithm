@@ -1,4 +1,4 @@
-package BarrierCoverage;
+package sensor_networks;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,10 +21,11 @@ public class KBarrierCoverage {
 	public KBarrierCoverage(float x_max, float y_max, float R, int K) {
 		this.x_max = x_max;
 		this.y_max = y_max;
-		
 		this.R = R;
+		
 		this.K = K;
-
+		this.nSensors = 0;
+		
 		this.sensors = new ArrayList<Sensor>();
 		this.left = new Sensor(0, 0, Integer.MAX_VALUE);
 		this.right = new Sensor(x_max, 0 , Integer.MAX_VALUE);
@@ -33,10 +34,11 @@ public class KBarrierCoverage {
 	public KBarrierCoverage(float x_max, float y_max, float R, int K, int nSensors) {
 		this.x_max = x_max;
 		this.y_max = y_max;
-		
 		this.R = R;
+		
 		this.K = K;
-
+		this.nSensors = 0;
+		
 		this.sensors = new ArrayList<Sensor>(nSensors);
 		this.left = new Sensor(0, 0, Integer.MAX_VALUE);
 		this.right = new Sensor(x_max, 0 , Integer.MAX_VALUE);
@@ -117,13 +119,13 @@ public class KBarrierCoverage {
 		
 		// Add the edges parting from the source (left wall, which is numbered 0 by convention)
 		for(int adj : coverage.getNode(0).out)
-			nw.addEdge(0, adj, sensors.get(adj).durability);
+			nw.addEdge(0, adj, sensors.get(adj).lifetime);
 		
 		// Separate each sensor node into two and link the adjacent nodes from the out-node to the adjacent node's in-node
 		for(int k = 1; k <= nSensors; k++) {
-			int dur = sensors.get(k).durability;
+			int dur = sensors.get(k).lifetime;
 			
-			// The out-node for the sensor with number k is k+nSensors
+			// The out-node for the sensor k is the node k+nSensors
 			nw.addEdge(k, k + nSensors, dur); 
 
 			Node coverageNode = coverage.getNode(k);
@@ -132,25 +134,53 @@ public class KBarrierCoverage {
 		}
 	}
 	
-	private LinkedList<Integer> dfsPath(int[][] adj) {
-		LinkedList<Integer> path = new LinkedList<Integer>();
-		
-		return path;
+	private void dfsPaths(int node, int target, float[][] flow, boolean[] visited, int[] parent, List<List<Integer>> paths) {
+		visited[node] = true;
+
+		// Check if the target was reached
+		if(node == target) {
+			// Build the list representing the path that was used
+			LinkedList<Integer> path = new LinkedList<Integer>();
+			
+			int curr = target;
+			while(parent[curr] != curr) {
+				path.addFirst(curr);
+				curr = parent[curr];
+			}
+			path.addFirst(curr);
+			
+			//Add this path to the list of found paths
+			paths.add(path);
+		}
+		// If the target was not reached, continue the depth first search
+		else {
+			Node n = nw.getNode(node);
+			
+			for(int adj : n.out) {
+				if(!visited[adj] && flow[node][adj] > 0) {
+					parent[adj] = node;
+					dfsPaths(adj, target, flow, visited, parent, paths);
+				}
+			}
+		}
+		visited[node] = false;
 	}
 	
-	public LinkedList<LinkedList<Integer>> getNodeDisjointPaths() {
-		LinkedList<LinkedList<Integer>> paths = new LinkedList<>();
+	public List<List<Integer>> getNodeDisjointPaths() {
 		buildFlowNetwork();
 		
+		int V = nw.graph.nNodes;
 		MaxFlow max = new MaxFlow(nw);
-		float maxFlow = max.getMaxFlowValue();
 		float[][] flow = max.getMaxFlow();
 		
-		// Depth-first search
-		LinkedList<Integer> currPath = new LinkedList<Integer>();
-		LinkedList<Integer> stack = new LinkedList<Integer>();
-		stack.push(0);
+		LinkedList<List<Integer>> paths = new LinkedList<List<Integer>>();
+		boolean[] visited = new boolean[V]; // Already initialized to all false values
+		int[] parent = new int[V];
 		
+		parent[nw.source] = nw.source;
+		dfsPaths(nw.source, nw.sink, flow, visited, parent, paths);
+		
+		// Transformar esses caminhos (que sao caminhos no grafo direcionado criado) em caminhos no coverage graph
 		
 		return paths;
 	}

@@ -1,9 +1,10 @@
 import java.util.*;
 
-import BarrierCoverage.KBarrierCoverage;
 import algorithms.MaxFlow;
 import algorithms.MaxKRouteFlow;
+
 import models.Node;
+import sensor_networks.KBarrierCoverage;
 import models.FlowNetwork;
 import models.Graph;
 
