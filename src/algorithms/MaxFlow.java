@@ -1,160 +1,131 @@
 package algorithms;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 
-import models.Node;
+import models.Edge;
+import models.Flow;
 import models.FlowNetwork;
-import models.Graph;
 
 public class MaxFlow {
-	private FlowNetwork nw;
-	private FlowNetwork residual;
-	private int V;
-
-	float maxFlowValue;
-	float[][] maxFlow;
-	
-	public MaxFlow() {
-		this.V = 0;
-		this.maxFlowValue = Float.NEGATIVE_INFINITY;
-	}
-	
-	public MaxFlow(FlowNetwork network) {
-		this.nw = network;
-		this.V = network.graph.nNodes;
-		this.maxFlow = new float[V][V];
-		
-		this.maxFlowValue = Float.NEGATIVE_INFINITY;
-	}
-	
-	public void setFlowNetwork(FlowNetwork newNetwork) {
-		nw = newNetwork;
-		
-		if(V != newNetwork.graph.nNodes) {
-			V = newNetwork.graph.nNodes;
-			maxFlow = new float[V][V];
-		}
-	}
-	
-	private void initializeFlow() {
-		// Initialize the flow on edges on the network to 0
-		// flow[u][v] if the edge from node u to node v doesn't exist on the original network
-		for(int i=0; i < V; i++)
-			for(int j=0; j < V; j++)
-				maxFlow[i][j] = Float.NEGATIVE_INFINITY;
-		
-		for(int from=0; from < V; from++) {
-			Node fromNode = nw.getNode(from);
-			for(int to: fromNode.out)
-				maxFlow[from][to] = 0;
-		}
-	}
-	
-	private void initializeResidualNetwork() {
+	// This class has static methods to solve the Max Flow Problem though a flow network with a single source and a single sink
+	// The edges must have edge capacities and may or may not have edge demands
+	private static FlowNetwork initializeResidualNetwork(FlowNetwork network ,HashMap<Edge, Double> flowMap) {
 		// This function initializes the residual network
-		// The matrix flow must be initialized before running this method
-		residual = new FlowNetwork(new Graph(V));
+		// Note: the flow must be initialized to a feasible flow for this function to return a correct residual network
+		int n = network.n;
+		FlowNetwork residual = new FlowNetwork(n);
 		
-		for(int from=0; from<V; from++) {
-			Node fromNode = nw.getNode(from); // get the node from the original graph
-			
-			for(int to : fromNode.out) {
+		// For each node on the original network
+		for(int from=0; from < n; from++) {
+			// Iterate over outbound edges 
+			for(Edge e : network.edgesOut(from)) {
 				// Create the forward edge on the residual graph
-				residual.addEdge(from, to, nw.getCapacity(from, to));
+				residual.addEdge(e, network.getCapacity(e) - flowMap.get(e));
 				
-				// Create the backwards edge if it doens't exist on the original graph
-				if(maxFlow[to][from] == Float.NEGATIVE_INFINITY && from != nw.source && to != nw.sink)
-					// flow[i][j] is - /infty if the edge from i to j doesn't exist on the original graph
-					residual.addEdge(to, from, 0);
+				Edge backwards = new Edge(e.to, e.from);
+				// Create the backwards edge if it doens't exist already on the original graph
+				// Note: flow contains all edges of the original graph and only them, use this for a O(1) check
+				if(!flowMap.containsKey(backwards) && e.from != network.source && e.to != network.sink)
+					residual.addEdge(backwards, flowMap.get(e)-network.getDemand(e));
 			}
 		}
+		
+		return residual;
 	}
 	
-	private boolean shortestPath(int[] paths) {
-		// paths[i] stores the parent of the i-th node on this search tree
-		boolean[] visited = new boolean[V];  // visited[i] is true iff the node was already seen during the search 
+	private static boolean shortestPath(int[] paths, FlowNetwork residual) {
+		// Searches for the shortest path from the source to the sink in BFS and stores the search tree, from which
+		// the shortest path can be recovered.
+		// Returns: true if a path was found, false if not.
+		int n = residual.n;
+		boolean[] visited = new boolean[n];  // visited[i] is true iff the node was already seen during the search 
+		LinkedList<Integer> queue = new LinkedList<Integer>();  // the queue (FIFO) used by the BFS algorithm
 		
 		// Initialize the BFS from the source
-		LinkedList<Integer> queue = new LinkedList<Integer>();
-		queue.push(residual.source);
+		queue.addLast(residual.source);
 		paths[residual.source] = residual.source;
 		visited[residual.source] = true;
 		
 		// Search for the sink remembering the paths taken
 		while(!queue.isEmpty() && !visited[residual.sink]) {
-			int curr = queue.pop();
-			Node currNode = residual.getNode(curr);
+			int curr = queue.removeFirst(); // dequeue an node
 
-			for(int adj: currNode.out)
-				if(!visited[adj] && residual.getCapacity(curr, adj) != 0) {
-					queue.push(adj);
-					paths[adj] = curr;
-					visited[adj] = true;
+			// Iterate over outbound edges
+			for(Edge e: residual.edgesOut(curr))
+				// If the adjacent node wasn't visited and edge has capacity
+				if(!visited[e.to] && residual.getCapacity(e) > 0) {
+					queue.addLast(e.to);  // enqueue the adjacent node
+					paths[e.to] = curr;   // store curr as the parent of the adjacent node on the search tree
+					visited[e.to] = true; // mark the adjacent node as visited
 				}
 		}
 		
 		return visited[residual.sink];
 	}
 	
-	private float augmentPath(int[] paths) {
-		float bottleneck = Integer.MAX_VALUE; // stores the minimum residual capacity along the path
+	private static void augmentPath(int[] paths, Flow flow, FlowNetwork residual) {
+		HashMap<Edge, Double> flowMap = flow.getMap();
+		double bottleneck = Double.MAX_VALUE; // stores the minimum residual capacity along the path
 		
 		// Calculate the bottleneck of the path (minimum residual capacity)
 		int curr = residual.sink;
 		while(paths[curr] != curr) {
 			int prev =  paths[curr];
-			if(bottleneck > residual.getCapacity(prev, curr))
-				bottleneck = residual.getCapacity(prev, curr);
+			Edge e = new Edge(prev, curr);
+			
+			if(bottleneck > residual.getCapacity(e))
+				bottleneck = residual.getCapacity(e);
 			curr = prev; 
 		}
 		
 		// Traverse the path again augmenting the flow
 		curr = residual.sink;
 		while(paths[curr] != curr) {
-			int prev =  paths[curr];
-			if(maxFlow[prev][curr] == Float.NEGATIVE_INFINITY) 
-				// If this is a backwards edge
-				maxFlow[curr][prev] -= bottleneck;
+			int prev = paths[curr];
+			Edge forward = new Edge(prev, curr);
+			Edge backward = new Edge(curr, prev);
+
+			// Update the flow
+			// Note: again, use flow to check wheter an edge exists on the original graph
+			if(!flowMap.containsKey(forward))
+				// If this is a backward edge
+				flowMap.put(backward, flowMap.get(backward)-bottleneck);
 			else
-				// If this is a forwards edge
-				maxFlow[prev][curr] += bottleneck;
+				// If this is a forward edge
+				flowMap.put(forward, flowMap.get(forward)+bottleneck);
 			
 			// Update the residual graph
-			residual.updateCapacity(prev, curr, -bottleneck);
-			residual.updateCapacity(curr, prev, bottleneck);
+			residual.setCapacity(forward, residual.getCapacity(forward)-bottleneck);
+			residual.setCapacity(backward, residual.getCapacity(backward)+bottleneck);
 
 			curr = prev; 
 		}
 		
-		return bottleneck;
+		// Update flow value
+		flow.setValue(bottleneck+flow.getValue());
 	}
 	
-	public void solveMaxFlow() {
+	public static Flow getFlow(FlowNetwork network) {
 		// Shortest Augmenting Path implementation of the Ford-Fulkerson Algorithm
 		// Also called the Dinitz-Edmonds-Karp Algorithm
-		int[] paths = new int[V]; // stores the search paths of the last BFS
-		maxFlowValue = 0;
+		int n = network.n;
+		Flow flow;
 		
-		initializeFlow();
-		initializeResidualNetwork();
+		// Initialize the flow to a feasible flow	
+		flow = FeasibleFlow.getFeasibleFlow(network);
+		
+		// Given the initial flow, create the residual network
+		FlowNetwork residual = initializeResidualNetwork(network, flow.getMap());
+		
+		// Initialize the path tree
+		int[] paths = new int[n]; // stores the search paths of the last BFS
 		
 		// While there is a path in the residual graph between the source and the sink,
 		// pick the shortest and augment the path.
-		while(shortestPath(paths))
-			maxFlowValue += augmentPath(paths);
-	}
-	
-	public float getMaxFlowValue() {
-		if(maxFlowValue == Float.NEGATIVE_INFINITY)
-			solveMaxFlow();
+		while(shortestPath(paths, residual))
+			augmentPath(paths, flow, residual);
 		
-		return maxFlowValue;
-	}
-	
-	public float[][] getMaxFlow() {
-		if(maxFlowValue == Float.NEGATIVE_INFINITY)
-			solveMaxFlow();
-		
-		return maxFlow;
+		return flow;
 	}
 }

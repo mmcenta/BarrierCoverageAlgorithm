@@ -1,52 +1,62 @@
+import java.io.IOException;
 import java.util.*;
 
-import algorithms.MaxFlow;
-import algorithms.MaxKRouteFlow;
-
-import models.Node;
-import sensor_networks.KBarrierCoverage;
-import models.FlowNetwork;
-import models.Graph;
+import algorithms.*;
+import models.*;
+import sensor_networks.*;
+import test.MaxFlowTest;
 
 public class Main {
-	static void printMatrix(float[][] m) {
-		System.out.println();
-		System.out.print("   ");
-		for(int j=0; j < m[0].length; j++)
-			System.out.format("  %2d", j);
-		System.out.println();
-		for(int i=0; i < m.length; i++) {
-			System.out.format("%2d: ", i);
-			for(int j=0; j < m[0].length; j++)
-				if(m[i][j] != -1)
-					System.out.format("%3f ", m[i][j]);
-				else
-					System.out.print("--- ");
-			System.out.println();
-		}
-	}
-	
 	public static void main(String[] args) {
-		FlowNetwork nw = new FlowNetwork(6);
-		nw.addEdge(0, 1, 2);
-		nw.addEdge(0, 2, 2);
-		nw.addEdge(1, 2, 7);
-		nw.addEdge(1, 3, 3);
-		nw.addEdge(2, 4, 4);
-		nw.addEdge(3, 5, 2);
-		nw.addEdge(4, 3, 13);
-		nw.addEdge(4, 5, 2);
-		
-		MaxKRouteFlow mkf = new MaxKRouteFlow(nw, 2);
-		MaxFlow mf = new MaxFlow(nw);
-		for(float p=(float) 0.01; p <= 20; p += 0.01) {
-			mf.setFlowNetwork(mkf.getMaxBoundedFlowNetwork(p));
-			float F_p = mf.getMaxFlowValue();
-			float phi = F_p - 2*p;
-			System.out.format("%f: (%f, %f) ", p, F_p, phi);
-		}
+//		long t0 = System.currentTimeMillis();
+//		
+//		KBarrierCoverage kbar = null;
+//		try {
+//			kbar = Reader.readKBarrierCoverage("sensornetwork0.doc");
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		List<ScheduleInterval> schedule = kbar.homogenousScheduling();
+//		
+//		SchedulePrinter.printToConsole(schedule);
+//		
+//		long t1 = System.currentTimeMillis();
+//		
+//		System.out.println("Time: "+(t1-t0)+" ms");
+
+		FlowNetwork nw = new FlowNetwork(4);
+		nw.addEdge(new Edge(0, 1), 2);
+		nw.addEdge(new Edge(0, 2), 3);
+		nw.addEdge(new Edge(0, 3), 5);
+		nw.addEdge(new Edge(1, 2), 1);
+		nw.addEdge(new Edge(2, 3), 5);
+		nw.addEdge(new Edge(3, 1), 2);
+
+		long t0 = System.currentTimeMillis();
+
+		Flow kMax = MaxKRouteFlow.getFlow(2, nw);
+		double root = kMax.getValue() / 2;
+
+		long t1 = System.currentTimeMillis();
+		System.out.println("Time MaxKRouteFlow : " + (t1 - t0) + " ms.");
+
+		System.out.println("root = " + root);
+		System.out.println("flow falue = " + kMax.getValue());
+		System.out.println("flow : " + kMax.getMap());
+
 		System.out.println();
-		System.out.println(mkf.getMaxFlowValue());
-		printMatrix(mkf.getMaxFlow());
+
+		t0 = System.currentTimeMillis();
+
+		Collection<ElementaryFlow> elemFlows = KRouteDecomposition.decompose(2, kMax, nw);
+
+		t1 = System.currentTimeMillis();
+		System.out.println("Time KRouteDecomposition : " + (t1 - t0) + " ms.");
+
+		for (ElementaryFlow kf : elemFlows) {
+			System.out.println("flow value = " + kf.getValue());
+			System.out.println("flow edges : " + kf.getAllEdges());
+		}
+
 	}
 }

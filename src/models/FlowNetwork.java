@@ -1,52 +1,82 @@
 package models;
 
+import java.util.HashMap;
+import java.util.List;
+
 public class FlowNetwork {
 	//	A class that represents a flow network
-	public Graph graph;  // the graph representing the network
-	public int source, sink;  // the node that represents the source and the sink  
-	private int V;  // the number of vertices
-	private float[][] capacities;  // capacities[i][j] stores the capacity from edge i to j
+	public final int n;            // the number of vertices
+	public int m;                  // the number of edges 
+	public Graph graph;  	 	   // the graph representing the structure of the network
+	public final int source, sink; // the nodes that represent the source and the sink  
+	public HashMap<Edge, Double> capacities;  // a hash map that stores edge capacities
+	public HashMap<Edge, Double> demands;     // a hash map that stores edge demands
+	private boolean hasDemands;                // boolean that stores wheter this flow network has edge demands
 	
 	public FlowNetwork(Graph directedGraph) {
+		this.n = directedGraph.n;
+		this.m = directedGraph.m;
 		this.graph = directedGraph;
-		this.V = directedGraph.nNodes;
-		this.capacities = new float[V][V];
-		
+		this.capacities = new HashMap<Edge, Double>();
+		this.demands = new HashMap<Edge, Double>();
+		this.hasDemands = false;
+
 		// For simplicity, the source is the first node and the sink is the last node 
 		this.source = 0;
-		this.sink = this.graph.nNodes-1;
+		this.sink = n-1;
 	}
 	
 	public FlowNetwork(int numberNodes) {
+		this.n = numberNodes;
+		this.m = 0;
 		this.graph = new Graph(numberNodes);
-		this.V = numberNodes;
-		this.capacities = new float[V][V];
+		this.capacities = new HashMap<Edge, Double>();
+		this.demands = new HashMap<Edge, Double>();
+		this.hasDemands = false;
 		
 		// For simplicity, the source is the first node and the sink is the last node 
 		this.source = 0;
-		this.sink = this.graph.nNodes-1;
+		this.sink = n-1;
 	}
 	
-	public float getCapacity(int from, int to) {
-		return capacities[from][to];
+	public double getCapacity(Edge e) {
+		if(!capacities.containsKey(e))
+			return 0;		
+		return capacities.get(e);
+	}
+
+	public void setCapacity(Edge e, double capacity) {
+		capacities.put(e, capacity);
 	}
 	
-	public void setCapacity(int from, int to, float capacity) {
-		capacities[from][to] = capacity;
+	public double getDemand(Edge e) {
+		if(!demands.containsKey(e))
+			return 0;	
+		return demands.get(e);
 	}
 	
-	public void updateCapacity(int from, int to, float change) {
-		capacities[from][to] += change;
+	public void setDemand(Edge e, double demand) {
+		if(demand > 0 && !hasDemands)
+			hasDemands = true;
+		demands.put(e, demand);
+	}
+			
+	public boolean hasDemands() {
+		return hasDemands;
 	}
 	
-	public void addEdge(int from, int to, float capacity) {
-		// Wraps the method addEdge from the graph
-		capacities[from][to] = capacity;
-		graph.addEdge(from, to);
+	public void addEdge(Edge e, double capacity) {
+		graph.addEdge(e);
+		capacities.put(e, capacity);
+		m++;
 	}
 	
 	public Node getNode(int node) {
 		// Wraps the method getNode from the graph
 		return graph.getNode(node);
+	}
+	
+	public List<Edge> edgesOut(int node) {
+		return graph.edgesOut(node);
 	}
 }

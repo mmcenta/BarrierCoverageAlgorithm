@@ -1,33 +1,32 @@
 package sensor_networks;
 
-import java.util.Comparator;
-
 public class Sensor {
-	public float x, y;
-	int lifetime;
-	int number;  // the number of this sensor on the input
+	public final double x, y;
+	public final int lifetime;
+	public int number;  // the number of this sensor on the input
 	
-	public Sensor(float x, float y, int lifetime) {
+	public Sensor(double x, double y, int lifetime, int number) {
+		this.x = x;
+		this.y = y;
+		this.lifetime = lifetime;
+		this.number = number;
+	}
+	
+	public Sensor(double x, double y, int lifetime) {
 		this.x = x;
 		this.y = y;
 		this.lifetime = lifetime;
 	}
 	
-	public void setNumber(int num) {
-		this.number = num;
+	public void setNumber(int number) {
+		this.number = number;
 	}
 	
 	public int getNumber() {
 		return this.number;
 	}
 	
-	public static float getDistance(Sensor s1, Sensor s2) {
-		return (float) Math.sqrt(Math.pow(s1.x-s2.x, 2) + Math.pow(s1.y-s2.y, 2));
+	public static double getDistance(Sensor s1, Sensor s2) {
+		return Math.sqrt(Math.pow(s1.x-s2.x, 2) + Math.pow(s1.y-s2.y, 2));
 	}
-	
-	public static Comparator<Sensor> xCoordCompare = new Comparator<Sensor>() {
-		public int compare(Sensor sensor1, Sensor sensor2) { 
-			return (int) (sensor1.x - sensor2.x);
-		}
-	};
 }
