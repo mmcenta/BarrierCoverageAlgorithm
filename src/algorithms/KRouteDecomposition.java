@@ -24,7 +24,7 @@ public class KRouteDecomposition {
 	private static ElementaryFlow extractElementaryFlow(int K, Flow flow, FlowNetwork network, double v) {
 		int n = network.n;
 		HashMap<Edge, Double> flowMap = flow.getMap();
-		ElementaryFlow elem;
+		ElementaryFlow elem = new ElementaryFlow();
 		
 		// Create the network with demands used to get an elementary flow
 		FlowNetwork demandNW = new FlowNetwork(n+1);
@@ -41,7 +41,9 @@ public class KRouteDecomposition {
 		demandNW.setDemand(toNewSink, K);
 		
 		// Get an elementary flow from the new network and set its value to minimum flow on its edges
-		elem = MaxElementaryFlow.getElementaryKFlow(demandNW);
+		Collection<List<Edge>> paths = AllFlowPaths.getAllFlowPaths(demandNW, MaxFlow.getFlow(demandNW));
+		for(List<Edge> path: paths)
+			elem.addPath(path);
 		
 		// Find the minimal flow on all paths edges and set the flow value to it
 		elem.setValue(getBottleneck(elem.getAllEdges(), flowMap));

@@ -3,19 +3,13 @@ package sensor_networks;
 public class Sensor {
 	public final double x, y;
 	public final int lifetime;
-	public int number;  // the number of this sensor on the input
+	private int number;  // the number of this sensor on the input
 	
 	public Sensor(double x, double y, int lifetime, int number) {
 		this.x = x;
 		this.y = y;
 		this.lifetime = lifetime;
 		this.number = number;
-	}
-	
-	public Sensor(double x, double y, int lifetime) {
-		this.x = x;
-		this.y = y;
-		this.lifetime = lifetime;
 	}
 	
 	public void setNumber(int number) {

@@ -41,6 +41,10 @@ public class ElementaryFlow {
 		return value;
 	}
 	
+	public int getK() {
+		return K;
+	}
+	
 	public boolean isEmpty() {
 		return paths.isEmpty();
 	}

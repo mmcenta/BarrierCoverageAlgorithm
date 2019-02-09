@@ -5,28 +5,29 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ScheduleInterval {
-	public int start, end;
-	private Collection<Integer> activeSensors;
+	public final int duration;
+	private Collection<List<Integer>> activePaths;
+
+	public ScheduleInterval(int duration) {
+		this.duration = duration;
+
+		this.activePaths = new LinkedList<List<Integer>>();
+	}
+
+	public void addPath(List<Integer> path) {
+		activePaths.add(path);
+	}
+
+	public Collection<List<Integer>> getPaths() {
+		return activePaths;
+	}
 	
-	public ScheduleInterval(int start, int end) {
-		this.start = start;
-		this.end = end;
+	public Collection<Integer> getAllSensors() {
+		Collection<Integer> all = new LinkedList<Integer>();
 		
-		this.activeSensors = new LinkedList<Integer>();
-	}
-	
-	public ScheduleInterval(int start, int end, List<Integer> sensors) {
-		this.start = start;
-		this.end = end;
+		for(List<Integer> path: activePaths)
+			all.addAll(path);
 		
-		this.activeSensors = new LinkedList<Integer>(sensors);
-	}
-	
-	public void addSensors(List<Integer> sensors) {
-		activeSensors.addAll(sensors);
-	}
-	
-	public Collection<Integer> getSensors() {
-		return activeSensors;
+		return all;
 	}
 }
