@@ -11,6 +11,8 @@ import models.Flow;
 import models.FlowNetwork;
 
 public class KRouteDecomposition {
+	// Class that provides funtionality to decompose a K-Route Flow into elementary flows.
+	
 	private static double getBottleneck(Collection<Edge> edges, HashMap<Edge, Double> flowMap) {
 		double bottleneck = Double.POSITIVE_INFINITY;
 		
@@ -38,10 +40,16 @@ public class KRouteDecomposition {
 		}
 		Edge toNewSink = new Edge(n-1, n);
 		demandNW.addEdge(toNewSink, K);
-		demandNW.setDemand(toNewSink, K);
+
+		// Get the max flow on the new network
+		Flow maxFlow = MaxFlow.getFlow(demandNW);
 		
-		// Get an elementary flow from the new network and set its value to minimum flow on its edges
-		Collection<List<Edge>> paths = AllFlowPaths.getAllFlowPaths(demandNW, MaxFlow.getFlow(demandNW));
+		// Check if there are K  paths
+		if(maxFlow.getValue() < K)
+			return null;
+		
+		// Extract the paths taken by the max flow
+		Collection<List<Edge>> paths = AllFlowPaths.getAllFlowPaths(demandNW, maxFlow);
 		for(List<Edge> path: paths)
 			elem.addPath(path);
 		
@@ -60,11 +68,13 @@ public class KRouteDecomposition {
 	}
 	
 	public static Collection<ElementaryFlow> decompose(int K ,Flow route, FlowNetwork network) {
+		// Returns the decomposition of a K-route flow, in the form of a set of elementary K-flows
+		
 		Collection<ElementaryFlow> allElemFlows = new LinkedList<ElementaryFlow>();
 		double v = route.getValue()/K;
 		
 		ElementaryFlow elemFlow = extractElementaryFlow(K, route, network, v);
-		while(!elemFlow.isEmpty()) {
+		while(elemFlow != null) {
 			allElemFlows.add(elemFlow);
 			elemFlow = extractElementaryFlow(K, route, network, v);
 		}

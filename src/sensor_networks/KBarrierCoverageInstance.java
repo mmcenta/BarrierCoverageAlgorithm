@@ -5,11 +5,12 @@ import java.util.Arrays;
 import models.Graph;
 
 public class KBarrierCoverageInstance {
+	// Represents an instance of the K-Barrier Coverage Problem
 	public final double x_max, y_max, R;
 	public final int K;
-	public int nSensors;
-	private int left, right;
-	private Sensor[] sensors;
+	public int nSensors; // the number of sensors
+	private int left, right; // the number associated to the left and right walls
+	private Sensor[] sensors; // a array storing information on the sensors
 
 	public KBarrierCoverageInstance(int K, double x_max, double y_max, double R, int nSensors) {
 		this.x_max = x_max;
@@ -61,22 +62,22 @@ public class KBarrierCoverageInstance {
 			int numS = s.getNumber();
 
 			if(s.x - sensors[left].x < R)
-				// if the sensor is close (< R) to the left wall, connect the two
+				// if the sensor is close (< 2R) to the left wall, connect the two
 				coverage.addEdge(left, numS);
 
 			if(sensors[right].x - s.x < R)
-				// if the sensor is close (< R) to the right wall, connect the two
+				// if the sensor is close (< 2R) to the right wall, connect the two
 				coverage.addEdge(numS, right);
 
 			// Check the sensors to the left of sensor until they are too far away
 			for(int leftIdx = k-1; leftIdx > 0; leftIdx--) {
 				Sensor leftSensor = sorted[leftIdx];
 
-				if (s.x - leftSensor.x < R && Sensor.getDistance(s, leftSensor) < R)
-					// if they are close (< R), connect them
+				if (s.x - leftSensor.x < 2*R && Sensor.getDistance(s, leftSensor) < 2*R)
+					// if they are close (< 2R), connect them
 					coverage.addEdge(numS, leftSensor.getNumber());
 
-				else if (s.x - leftSensor.x > R)
+				else if (s.x - leftSensor.x > 2*R)
 					// if the sensors are too far away to the left, stop checking
 					break;
 			}
@@ -84,11 +85,11 @@ public class KBarrierCoverageInstance {
 			for(int rightIdx = k + 1; rightIdx <= nSensors; rightIdx++) {
 				Sensor rightSensor = sorted[rightIdx];
 
-				if(rightSensor.x - s.x < R && Sensor.getDistance(s, rightSensor) < R)
-					// if they are close (< R), connect them
+				if(rightSensor.x - s.x < 2*R && Sensor.getDistance(s, rightSensor) < 2*R)
+					// if they are close (< 2R), connect them
 					coverage.addEdge(numS, rightSensor.getNumber());
 
-				else if(rightSensor.x - s.x > R)
+				else if(rightSensor.x - s.x > 2*R)
 					// if the sensors are too far away to the right, stop checking
 					break;
 			}

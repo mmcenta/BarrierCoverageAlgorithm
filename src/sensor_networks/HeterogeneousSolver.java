@@ -54,6 +54,8 @@ public class HeterogeneousSolver {
 	}
 	
 	public static Map<List<Integer>, Integer> getValuesFromPaths(Collection<List<Integer>> paths, KBarrierCoverageInstance ins) {
+		// Given a set of paths, associate to each path a value correspondent to the bottleneck on that path
+		
 		Map<List<Integer>, Integer> values = new HashMap<List<Integer>, Integer>();
 		
 		for(List<Integer> path: paths) {
@@ -71,6 +73,8 @@ public class HeterogeneousSolver {
 	}
 	
 	public static List<ScheduleInterval> schedule(KBarrierCoverageInstance ins) {
+		// Provides a optimal schedule for a instance of the K-Barrier Coverage Problem with different sensor lifetimes.
+		
 		List<ScheduleInterval> schedule = new LinkedList<ScheduleInterval>();
 		FlowNetwork network = getFlowNetwork(ins);
 		int K = ins.K;
@@ -79,7 +83,7 @@ public class HeterogeneousSolver {
 		Collection<ElementaryFlow> elemPaths = KRouteDecomposition.decompose(K, MaxKRouteFlow.getFlow(K, network), network);
 
 		for (ElementaryFlow ef : elemPaths) {
-			ScheduleInterval interval = new ScheduleInterval((int) ef.getValue());
+			ScheduleInterval interval = new ScheduleInterval((int) Math.round(ef.getValue()));
 
 			for (List<Edge> path : ef.getPaths()) {
 				List<Integer> sensorPath = new LinkedList<Integer>();

@@ -1,6 +1,7 @@
 package models;
 
 public class Edge {
+	// Represnts an edge on a graph
 	public final int from, to;
 
 	public Edge(int from, int to) {

@@ -5,8 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ScheduleInterval {
-	public final int duration;
-	private Collection<List<Integer>> activePaths;
+	// Represents a interval in the schedule when the configuration of the sensors doesn't change
+	public final int duration; // the duration of this interval
+	private Collection<List<Integer>> activePaths; // the paths that remain active during this schedule
 
 	public ScheduleInterval(int duration) {
 		this.duration = duration;

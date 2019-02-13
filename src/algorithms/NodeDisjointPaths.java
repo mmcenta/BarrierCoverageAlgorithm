@@ -9,6 +9,8 @@ import models.FlowNetwork;
 import models.Graph;
 
 public class NodeDisjointPaths {
+	// Class that provides the functionality of extrating a maximum ammount of node-disjoint paths in a graph.
+	
 	private static FlowNetwork buildFlowNetwork(Graph g) {
 		// Build flow nework by spliting intermediate nodes (not source r target) into
 		// an "in-node" and an "out-node"

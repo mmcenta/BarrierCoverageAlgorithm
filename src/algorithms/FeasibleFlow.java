@@ -7,6 +7,8 @@ import models.Flow;
 import models.FlowNetwork;
 
 public class FeasibleFlow {
+	// Class which provides the necessary functions to create a feasible flow taking a flow network as input.
+	
 	private static FlowNetwork reduceFlowNetwork(FlowNetwork original) {
 		// Reduce this flow network with demands to a new flow network without demands
 		int n = original.n;

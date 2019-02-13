@@ -10,6 +10,9 @@ import models.Flow;
 import models.FlowNetwork;
 
 public class AllFlowPaths {
+	// Auxiliary class that provides functionality to discover the paths a flow takes to get from the source to the sink
+	// (it detects all paths from the source to the sink that only use edges with positive flow)
+	
 	private static void dfsPaths(int node, int target, boolean[] visited, int[] parent,
 						         FlowNetwork network,  HashMap<Edge, Double> flowMap,  Collection<List<Edge>> paths) {
 		visited[node] = true;
@@ -40,6 +43,8 @@ public class AllFlowPaths {
 	}
 	
 	public static Collection<List<Edge>> getAllFlowPaths(FlowNetwork network, Flow flow) {
+		// Returns all the paths that the flow takes from the source to the sink in the network
+		
 		int n = network.n;
 		HashMap<Edge, Double> flowMap = flow.getMap();
 		Collection<List<Edge>> paths = new LinkedList<List<Edge>>();

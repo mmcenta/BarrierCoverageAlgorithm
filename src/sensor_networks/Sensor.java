@@ -1,8 +1,9 @@
 package sensor_networks;
 
 public class Sensor {
-	public final double x, y;
-	public final int lifetime;
+	// Represents a sensor
+	public final double x, y; // its position
+	public final int lifetime; // its lifetime
 	private int number;  // the number of this sensor on the input
 	
 	public Sensor(double x, double y, int lifetime, int number) {

@@ -5,9 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ElementaryFlow {
-	private double value;
-	private int K;
-	private Collection<List<Edge>> paths;
+	// Represents a elementary K-flow.
+	private double value; // the flow value (the value of the flow at each edge)
+	private int K; // the number of node-disjoint paths in this flow
+	private Collection<List<Edge>> paths; // the node-disjoint paths in this flow
 
 	public ElementaryFlow() {
 		this.value = 0.0;
