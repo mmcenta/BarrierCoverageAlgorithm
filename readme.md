@@ -3,7 +3,7 @@
 ## Matheus Centa / Joao Rocha Oliveira
 
 ### Clarifications for GitHub:
-This project was developed as part of the "INF421 - Analysis and Design of Algorithms" course at École Polytechnique. The directions and subject is given here.
+This project was developed as part of the "INF421 - Analysis and Design of Algorithms" course at École Polytechnique. The directions and subject is given [here](https://marceaucoupechoux.wp.imt.fr/en/enseignement/english-inf421-pi/).
 
 ### Usage:
 This project is executed by running the Main.java in the ``/bin`` folder with two program arguments ``<mode>`` and ``<file>`` (the order of arguments is important): 
